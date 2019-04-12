@@ -51,6 +51,8 @@ Check the logs to see what's happening.
 * Ctrl+C will close the program immediately. The code doesn't worry about finishing goroutines gracefully.
 * Everything you see in the _Algorand Chat_ window is exclusively confirmed on-chain. I intentionally avoided _cheating_ showing new messages as soon as is submitted (before real confirmation). In a production chat service we'd intentionally do the opposite, display it right away with some UX signals (async).
 
+In case you're having troubles with the `algod.token` or `kmd.token`, stop both the node and kmd, delete the `.token` files, and start them again: `goal node start`  (remember `-d` flag if you're not using the env variable config), also recall that kmd doesn't start automatically with `goal node start`, so you should do `goal kmd start` too.
+
 ## Seems to be a good idea
 * Event notifications _natively_ from the SDK, e.g, a new block has arrived.
 * Synchronous transaction sending or confirmation callbacks.
