@@ -144,7 +144,7 @@ func (ams *AlgoChatStream) sendMessagesInTrx(msg string) error {
 		return errors.Wrap(err, "couldn't marshal msg")
 	}
 
-	tx, err := transaction.MakePaymentTxn(ams.fromAddr, chatAddr, txParams.Fee, 1, txParams.LastRound, txParams.LastRound+10, msgBytes, txParams.GenesisID)
+	tx, err := transaction.MakePaymentTxn(ams.fromAddr, chatAddr, txParams.Fee, 1, txParams.LastRound, txParams.LastRound+10, msgBytes, "", txParams.GenesisID)
 	if err != nil {
 		return errors.Wrap(err, "error creating the transaction")
 	}
