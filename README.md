@@ -40,6 +40,34 @@ Here a 20s demo:
 
 Check the logs to see what's happening.
 
+## Instructions
+### Prerequisites
+1. Install golang, ```sudo apt-get install golang```
+2. Create ```go``` folder and set environment path variables
+``` 
+cat >> ~/.bashrc << 'EOF'
+export GOPATH=$HOME/go
+export PATH=/usr/local/go/bin:$PATH:$GOPATH/bin
+EOF 
+```
+```source ~/.bashrc```
+
+3.  Verify you have the GOPATH env correctly: ```echo $GOPATH```
+4. Install git, ```sudo apt-get install git```
+### Installation
+5. Inside the ```go``` folder, do: ```go get github.com/jsign/algochat```
+6. Navigate inside the folder above, i.e. ```cd $GOPATH/src/github.com/jsign/algochat```
+
+### Running the App
+7. Make sure you start ```kmd``` as it's not started by default on the node (`goal kmd start`)
+8. Launch the AlgoChat app
+>go run main.go -wallet <name of your wallet> -from your-account-address -algodaddress http://192.168.1.1:8080 -algodtoken your-algod-token -kmdtoken your-kmd-token -kmdaddress http://192.168.1.1:7833 -username Guest
+9. If using Windows and have an SSH client (e.g. Putty, SecureCRT), to display properly AlgoChat, you need in the appearance settings of the client to set character encoding to ```UTF-8```
+
+Thanks to [nikandriko](https://github.com/nikandriko) for elaborating the above step-by-step instructions.
+
+In case you're having troubles with the `algod.token` or `kmd.token`, stop both the node and kmd, delete the `.token` files, and start them again `goal node start`  (remember `-d` flag if you're not using the env variable config).
+
 ## Random notes
 * Whenever a user sends a message to the chatroom it gets marshaled in the _note_ field of the transaction. 
 * Every transaction with the destination address _KPLD4GPZYXST7S2ALYSAVRCBWYBCUQCN6T4N6HAYCHCP4GOV7KWJUGITBE_ is considered a message of the app.
@@ -50,8 +78,6 @@ Check the logs to see what's happening.
 * The SDK allows sending the transaction only asynchronously. After the transaction is submitted, the program scans the pending transactions until the sent transactionID is out of the pool, then considers the transaction confirmed (... not 100% true).
 * Ctrl+C will close the program immediately. The code doesn't worry about finishing goroutines gracefully.
 * Everything you see in the _Algorand Chat_ window is exclusively confirmed on-chain. I intentionally avoided _cheating_ showing new messages as soon as is submitted (before real confirmation). In a production chat service we'd intentionally do the opposite, display it right away with some UX signals (async).
-
-In case you're having troubles with the `algod.token` or `kmd.token`, stop both the node and kmd, delete the `.token` files, and start them again: `goal node start`  (remember `-d` flag if you're not using the env variable config), also recall that kmd doesn't start automatically with `goal node start`, so you should do `goal kmd start` too.
 
 ## Seems to be a good idea
 * Event notifications _natively_ from the SDK, e.g, a new block has arrived.
