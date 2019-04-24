@@ -27,7 +27,7 @@
 
 [[constraint]]
   name = "github.com/algorand/go-algorand-sdk"
-  version = "0.0.3"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/jroimartin/gocui"
