@@ -47,12 +47,6 @@ func (client Client) Versions() (response models.Version, err error) {
 	return
 }
 
-// LedgerBalances gets the BalancesResponse for the specified node // TODO: To be removed before production
-func (client Client) LedgerBalances() (response models.Balances, err error) {
-	err = client.get(&response, "/ledger/balances", nil)
-	return
-}
-
 // LedgerSupply gets the supply details for the specified node's Ledger
 func (client Client) LedgerSupply() (response models.Supply, err error) {
 	err = client.get(&response, "/ledger/supply", nil)
@@ -60,14 +54,33 @@ func (client Client) LedgerSupply() (response models.Supply, err error) {
 }
 
 type transactionsByAddrParams struct {
-	FirstRound uint64 `url:"firstRound"`
-	LastRound  uint64 `url:"lastRound"`
+	FirstRound uint64 `url:"firstRound,omitempty"`
+	LastRound  uint64 `url:"lastRound,omitempty"`
+	FromDate   string `url:"fromDate,omitempty"`
+	ToDate     string `url:"toDate,omitempty"`
+	Max        uint64 `url:"max,omitempty"`
 }
 
 // TransactionsByAddr returns all transactions for a PK [addr] in the [first,
 // last] rounds range.
 func (client Client) TransactionsByAddr(addr string, first, last uint64) (response models.TransactionList, err error) {
-	err = client.get(&response, fmt.Sprintf("/account/%s/transactions", addr), transactionsByAddrParams{first, last})
+	params := transactionsByAddrParams{FirstRound: first, LastRound: last}
+	err = client.get(&response, fmt.Sprintf("/account/%s/transactions", addr), params)
+	return
+}
+
+// TransactionsByAddrLimit returns the last [limit] number of transaction for a PK [addr].
+func (client Client) TransactionsByAddrLimit(addr string, limit uint64) (response models.TransactionList, err error) {
+	params := transactionsByAddrParams{Max: limit}
+	err = client.get(&response, fmt.Sprintf("/account/%s/transactions", addr), params)
+	return
+}
+
+// TransactionsByAddr returns all transactions for a PK [addr] in the [first,
+// last] date range. Dates are of the form "2006-01-02".
+func (client Client) TransactionsByAddrForDate(addr string, first, last string) (response models.TransactionList, err error) {
+	params := transactionsByAddrParams{FromDate: first, ToDate: last}
+	err = client.get(&response, fmt.Sprintf("/account/%s/transactions", addr), params)
 	return
 }
 
@@ -82,6 +95,29 @@ func (client Client) AccountInformation(address string) (response models.Account
 func (client Client) TransactionInformation(accountAddress, transactionID string) (response models.Transaction, err error) {
 	transactionID = stripTransaction(transactionID)
 	err = client.get(&response, fmt.Sprintf("/account/%s/transaction/%s", accountAddress, transactionID), nil)
+	return
+}
+
+// PendingTransactionInformation gets information about a recently issued
+// transaction.  There are several cases when this might succeed:
+//
+// - transaction committed (CommittedRound > 0)
+// - transaction still in the pool (CommittedRound = 0, PoolError = "")
+// - transaction removed from pool due to error (CommittedRound = 0, PoolError != "")
+//
+// Or the transaction may have happened sufficiently long ago that the
+// node no longer remembers it, and this will return an error.
+func (client Client) PendingTransactionInformation(transactionID string) (response models.Transaction, err error) {
+	transactionID = stripTransaction(transactionID)
+	err = client.get(&response, fmt.Sprintf("/transactions/pending/%s", transactionID), nil)
+	return
+}
+
+// TransactionByID gets a transaction by its ID. Works only if the indexer is enabled on the node
+// being queried.
+func (client Client) TransactionByID(transactionID string) (response models.Transaction, err error) {
+	transactionID = stripTransaction(transactionID)
+	err = client.get(&response, fmt.Sprintf("/transaction/%s", transactionID), nil)
 	return
 }
 
