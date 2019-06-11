@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f090745c840aef3441a749be292cc86e60f7e4b9bae92cb3cf50e1cc98b762cf"
+  digest = "1:45b73c662f9cce1d9722da50d160cb920a54c34392376e270c1dca0b1d356ce2"
   name = "github.com/algorand/go-algorand-sdk"
   packages = [
     "client/algod",
@@ -16,15 +16,15 @@
     "types",
   ]
   pruneopts = "UT"
-  revision = "914337941e72319c82799b8d48aafb9ebd957323"
+  revision = "3ce28b9f0397d7056b8b1eee0cb7ede608e5de19"
 
 [[projects]]
   branch = "master"
-  digest = "1:5cd929f500a32f7829e206b4399fade53f24fd2784f30795d5badbd866e836d4"
+  digest = "1:659fa237f7089594d4235f8f11b760e21a3eafc3dc3e9c052b4ac3d4e5731618"
   name = "github.com/algorand/go-codec"
   packages = ["codec"]
   pruneopts = "UT"
-  revision = "17f33432a5ced1ee33bc91bb7757f0444f095c96"
+  revision = "269d70b6135dc6554dae9880724d1c8209573c23"
 
 [[projects]]
   digest = "1:a63cff6b5d8b95638bfe300385d93b2a6d9d687734b863da8e09dc834510a690"
@@ -75,7 +75,7 @@
     "ed25519/internal/edwards25519",
   ]
   pruneopts = "UT"
-  revision = "c05e17bb3b2dca130fc919668a96b4bec9eb9442"
+  revision = "5c40567a22f818bd14a1ea7245dad9f8ef0691aa"
 
 [solve-meta]
   analyzer-name = "dep"

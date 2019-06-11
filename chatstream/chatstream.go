@@ -144,7 +144,7 @@ func (ams *AlgoChatStream) sendMessagesInTrx(msg string) error {
 		return errors.Wrap(err, "couldn't marshal msg")
 	}
 
-	tx, err := transaction.MakePaymentTxn(ams.fromAddr, chatAddr, txParams.Fee*2, 1, txParams.LastRound, txParams.LastRound+100, msgBytes, "", txParams.GenesisID)
+	tx, err := transaction.MakePaymentTxn(ams.fromAddr, chatAddr, txParams.Fee, 1, txParams.LastRound, txParams.LastRound+100, msgBytes, "", txParams.GenesisID, txParams.GenesisHash)
 	if err != nil {
 		return errors.Wrap(err, "error creating the transaction")
 	}
@@ -158,37 +158,36 @@ func (ams *AlgoChatStream) sendMessagesInTrx(msg string) error {
 		return errors.Wrap(err, "couldn't sign the transaction")
 	}
 
-	ams.logg <- fmt.Sprintf("Sending with fee %v algos...", tx.Fee)
+	ams.logg <- fmt.Sprintf("Sending with fee %v microalgos...", tx.Fee)
 	sentTxID, err := ams.algodClient.SendRawTransaction(signResponse.SignedTransaction)
 	if err != nil {
 		ams.logg <- "Failed to send the message!"
 		return errors.Wrap(err, "failed sending the transaction")
 	}
 	ams.logg <- "Waiting for confirmation..."
-	unconfirmedTx := true
-	for unconfirmedTx {
-		time.Sleep(time.Millisecond * 200)
-		ptxs, err := ams.algodClient.GetPendingTransactions(0)
-		if err != nil {
-			log.Printf("%v", err)
-			continue
-		}
 
-		unconfirmedTx = false
-		for _, t := range ptxs.TruncatedTxns.Transactions {
-			if strings.Compare(t.TxID, sentTxID.TxID) == 0 {
-				unconfirmedTx = true
-				break
-			}
+	unconfirmedTx := true
+	errorTx := ""
+	for unconfirmedTx {
+		time.Sleep(time.Millisecond * 100)
+		txn, err := ams.algodClient.PendingTransactionInformation(sentTxID.TxID)
+		if err != nil {
+			errorTx = "Error querying pending transaction!"
+			break
 		}
+		unconfirmedTx = txn.ConfirmedRound > 0
+		errorTx = txn.PoolError
 	}
-	ams.logg <- "Done, will appear soon!"
+	if errorTx == "" {
+		ams.logg <- "Done, will appear soon!"
+	} else {
+		ams.logg <- "Error!: " + errorTx
+	}
 
 	return nil
 }
 
 func (ams *AlgoChatStream) listenNewMessages() {
-
 	status, err := ams.algodClient.Status()
 
 	if err != nil {
@@ -214,7 +213,7 @@ func (ams *AlgoChatStream) listenNewMessages() {
 			continue
 		}
 
-		for _, t := range b.Txns.Transactions {
+		for _, t := range b.Transactions.Transactions {
 			if strings.Compare(t.Payment.To, chatAddr) == 0 {
 				message := &algochat.ChatMessage{}
 				err = json.Unmarshal(t.Note, message)
